@@ -7,15 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import wrapsto.config.AppContext;
 import wrapsto.dto.SMSDto;
 import wrapsto.dto.VerfiyOTPDto;
 import wrapsto.exceptionhandling.Conflict;
 import wrapsto.models.Users;
 import wrapsto.repository.UserRepository;
+import wrapsto.security.TokenVerification;
 import wrapsto.service.SendOtp;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Random;
 
 @Service
@@ -26,6 +27,9 @@ public class SendOtpImpl implements SendOtp {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    TokenVerification tokenVerification;
 
     @Override
     public void sendOTP(SMSDto sms) {
@@ -57,10 +61,14 @@ public class SendOtpImpl implements SendOtp {
     }
 
     @Override
-    public ResponseEntity<String> verifyOTP(VerfiyOTPDto verfiyOTPDto) {
+    public ResponseEntity<String> verifyOTP(HttpServletResponse response,VerfiyOTPDto verfiyOTPDto) {
         if (userRepository.findById(verfiyOTPDto.getMobileNumber()).isPresent()) {
             Users otp = userRepository.getOne(verfiyOTPDto.getMobileNumber());
             if (otp.getOtp().equals(verfiyOTPDto.getOtp())) {
+                String accessToken=tokenVerification.accessRefreshToken(verfiyOTPDto.getMobileNumber(), Long.parseLong(appContext.getAccessTokenValidity()));
+                String refreshToken=tokenVerification.accessRefreshToken(verfiyOTPDto.getMobileNumber(),Long.parseLong(appContext.getRefreshTokenValidity()));
+                tokenVerification.setCookie(response,"AccessToken",accessToken,"/user");
+                tokenVerification.setCookie(response,"RefreshToken",refreshToken,"/user");
                 return ResponseEntity.ok().body("OTP verified");
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Verification failed");

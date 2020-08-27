@@ -5,6 +5,4 @@ import wrapsto.service.UserService;
 
 public class UserImpl implements UserService {
 
-
-
 }

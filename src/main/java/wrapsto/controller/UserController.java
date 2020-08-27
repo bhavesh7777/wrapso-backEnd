@@ -10,6 +10,8 @@ import wrapsto.dto.VerfiyOTPDto;
 import wrapsto.exceptionhandling.BadRequest;
 import wrapsto.service.serviceimplements.SendOtpImpl;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RestController
 @RequestMapping(value = "/user")
 @CrossOrigin(allowCredentials = "true")
@@ -27,9 +29,9 @@ public class UserController {
     }
 
     @PutMapping("otp")
-    public ResponseEntity<String> verifyOtp(@Validated @RequestBody VerfiyOTPDto  verfiyOTPDto){
+    public ResponseEntity<String> verifyOtp(HttpServletResponse response, @Validated @RequestBody VerfiyOTPDto  verfiyOTPDto){
 
-        return sendOtp.verifyOTP(verfiyOTPDto);
+        return sendOtp.verifyOTP(response,verfiyOTPDto);
     }
 
 }
