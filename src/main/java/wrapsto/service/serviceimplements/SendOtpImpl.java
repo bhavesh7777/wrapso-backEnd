@@ -4,11 +4,13 @@ import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import wrapsto.config.AppContext;
 import wrapsto.dto.SMSDto;
+import wrapsto.dto.VerfiyOTPDto;
 import wrapsto.exceptionhandling.Conflict;
 import wrapsto.models.Users;
 import wrapsto.repository.UserRepository;
@@ -35,10 +37,7 @@ public class SendOtpImpl implements SendOtp {
 
     @Override
     public ResponseEntity<String> sendNotification(String mobileNumber) {
-        System.out.println(mobileNumber);
         boolean isPresent = userRepository.findById(mobileNumber).isPresent();
-        System.out.println(isPresent);
-
         if (isPresent) {
             throw new Conflict("Duplicate Entry");
         } else {
@@ -56,4 +55,20 @@ public class SendOtpImpl implements SendOtp {
             return ResponseEntity.ok().body("SMS sent successfully");
         }
     }
+
+    @Override
+    public ResponseEntity<String> verifyOTP(VerfiyOTPDto verfiyOTPDto) {
+        if (userRepository.findById(verfiyOTPDto.getMobileNumber()).isPresent()) {
+            Users otp = userRepository.getOne(verfiyOTPDto.getMobileNumber());
+            if (otp.getOtp().equals(verfiyOTPDto.getOtp())) {
+                return ResponseEntity.ok().body("OTP verified");
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Verification failed");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Number not found");
+
+    }
 }
+
+
+
