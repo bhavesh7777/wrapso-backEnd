@@ -12,6 +12,6 @@ import wrapsto.models.FoodItems;
 public interface FoodItemRepository extends JpaRepository<FoodItems,Integer> {
 
     @Query(value = "SELECT * FROM Wrapsto.food_items where food_category=:category",nativeQuery = true)
-    Page<FoodItems> pizza(@Param("category") String category, Pageable pageable);
+    Page<FoodItems> getItemByCategory(@Param("category") String category, Pageable pageable);
 
 }

@@ -15,4 +15,6 @@ public interface SendOtp {
 
     ResponseEntity<String> verifyOTP(HttpServletResponse response, VerfiyOTPDto verfiyOTPDto);
 
+    ResponseEntity<String> updateOtp(String mobileNumber);
+
 }

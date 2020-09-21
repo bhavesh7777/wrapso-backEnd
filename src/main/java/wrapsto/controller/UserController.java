@@ -9,18 +9,17 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.WebUtils;
-import wrapsto.dto.MobileNumberDto;
-import wrapsto.dto.VerfiyOTPDto;
+import wrapsto.config.Constants;
+import wrapsto.dto.*;
 import wrapsto.exceptionhandling.BadRequest;
 import wrapsto.models.FoodItems;
+import wrapsto.models.Orders;
 import wrapsto.security.TokenVerification;
 import wrapsto.service.serviceimplements.FoodItemImpl;
 import wrapsto.service.serviceimplements.OrdersImpl;
 import wrapsto.service.serviceimplements.SendOtpImpl;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -42,7 +41,7 @@ public class UserController {
     @PostMapping("otp")
     public ResponseEntity<String> loginSendOtp(@Validated @RequestBody MobileNumberDto mobileNumber, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            throw new BadRequest("mobile number is mandatory");
+            throw new BadRequest(Constants.MOBILE_NUMBER_IS_MANDATORY);
         }
         return sendOtp.sendNotification(mobileNumber.getMobileNumber());
     }
@@ -65,10 +64,9 @@ public class UserController {
     }
 
     @PostMapping("cart/item/{foodId}")
-    public ResponseEntity<String> addItemToCart(HttpServletRequest request,@PathVariable int foodId) {
-        Cookie accessToken = WebUtils.getCookie(request, "AccessToken");
-        String userEmail = tokenVerification.extractDataFromToken(accessToken.getValue()).getSubject();
-        return ordersImpl.addCartItem(userEmail, foodId);
+    public ResponseEntity<String> addItemToCart(@PathVariable int foodId) {
+        //String userEmail = tokenVerification.extractDataFromToken(token).getSubject();
+        return ordersImpl.addCartItem("+917676455551", foodId);
     }
 
     @DeleteMapping("cart/item/{orderId}")
@@ -76,11 +74,20 @@ public class UserController {
         ordersImpl.removeCartItem(orderId);
     }
 
-//    @GetMapping("cart/item")
-//    public ResponseEntity<String> getCartItems(HttpServletRequest request){
-//        Cookie accessToken = WebUtils.getCookie(request, "AccessToken");
-//        String userEmail = tokenVerification.extractDataFromToken(accessToken.getValue()).getSubject();
-//
-//    }
+    @GetMapping("cart/item")
+    public ResponseEntity<CartWithTotalAmountDTO> cartItems() {
+        return ResponseEntity.ok(ordersImpl.viewCartItem());
+    }
+
+    @PutMapping("cart/checkout")
+    public ResponseEntity<String> updateCartStatusWithUserData(@RequestBody CheckoutDTO checkoutDTO) {
+        return ordersImpl.checkoutStatus(checkoutDTO);
+    }
+
+    @GetMapping("orders")
+    public ResponseEntity<List<Orders>> getOrdersForUser(){
+        return ordersImpl.ordersWithPaidStatus("+917676455551");
+
+    }
 
 }

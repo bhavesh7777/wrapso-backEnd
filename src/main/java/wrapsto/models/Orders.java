@@ -17,11 +17,12 @@ public class Orders {
     @JoinColumn(name = "food_item_id", referencedColumnName = "foodId")
     private FoodItems foodItemId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "Status")
     private Status status;
 
     public enum Status {
-    ADDED
+    ADDED,PAID
     }
 
     public int getOrderId() {

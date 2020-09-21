@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import wrapsto.config.Constants;
 import wrapsto.models.FoodItems;
 import wrapsto.repository.FoodItemRepository;
 import wrapsto.service.FoodItemService;
@@ -25,11 +26,11 @@ public class FoodItemImpl implements FoodItemService {
         items.setFoodName(foodItems.getFoodName());
         items.setImage(foodItems.getImage());
         foodItemRepository.save(items);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Item Added");
+        return ResponseEntity.status(HttpStatus.CREATED).body(Constants.ITEMS_ADDED);
     }
 
     @Override
     public Page<FoodItems> getAllPizza(String catrgory,Pageable pageable) {
-        return foodItemRepository.pizza(catrgory,pageable);
+        return foodItemRepository.getItemByCategory(catrgory,pageable);
     }
 }
